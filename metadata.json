@@ -1,0 +1,6 @@
+{
+  "name": "AgentBlackBox",
+  "description": "Flight Recorder & Interactive Graph Debugger for AI Agents",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
