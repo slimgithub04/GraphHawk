@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Activity, Play, Download, LayoutDashboard, Pause, FileJson, Image, Code2, FileText } from 'lucide-react';
+import { LayoutGrid, Play, Download, Pause, FileJson, Image, Code2, FileText } from 'lucide-react';
 import { cn } from '../lib/utils';
 
 interface TopbarProps {
@@ -13,7 +13,7 @@ interface TopbarProps {
   fidelityScore: number;
 }
 
-export function Topbar({ onNewRecording, onStartReplay, onExportJson, onExportPng, onExportMermaid, onExportMarkdown, isReplaying, fidelityScore }: TopbarProps) {
+export function Topbar({ onStartReplay, onExportJson, onExportPng, onExportMermaid, onExportMarkdown, isReplaying, fidelityScore }: TopbarProps) {
   const [isExportMenuOpen, setIsExportMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -30,19 +30,17 @@ export function Topbar({ onNewRecording, onStartReplay, onExportJson, onExportPn
   return (
     <header className="h-14 border-b border-zinc-200 bg-white flex items-center justify-between px-5 shrink-0">
       <div className="flex items-center gap-3">
-        <div className="bg-zinc-900 p-1.5 rounded-md shadow-sm">
-          <Activity className="w-4 h-4 text-white" />
+        <div className="bg-[#0f172a] p-1.5 rounded-md shadow-sm">
+          <LayoutGrid className="w-5 h-5 text-white" strokeWidth={2.5} />
         </div>
-        <div className="flex items-baseline gap-2">
-          <h1 className="font-bold text-zinc-900 text-sm tracking-tight leading-tight">AgentBlackBox</h1>
-          <p className="text-[10px] uppercase font-bold tracking-widest text-zinc-400">Tracer</p>
+        <div className="flex items-center gap-2 text-sm ml-1">
+          <h1 className="font-bold text-slate-900 tracking-tight text-[15px]">AgentBlackBox</h1>
+          <span className="text-slate-300 font-light">/</span>
+          <p className="text-slate-500 font-semibold text-[13px]">Agent Execution Tracer</p>
         </div>
-        <span className="ml-3 px-2 py-0.5 rounded-md text-[10px] uppercase font-bold tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200/50">
-          Recording Mode
-        </span>
       </div>
 
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-3">
          {fidelityScore > 0 && (
            <div className={cn("flex items-center gap-2 mr-3 border px-3 py-1 rounded-full shadow-sm",
              fidelityScore >= 90 ? "bg-emerald-50 border-emerald-200" : (fidelityScore >= 70 ? "bg-amber-50 border-amber-200" : "bg-rose-50 border-rose-200")
@@ -52,18 +50,14 @@ export function Topbar({ onNewRecording, onStartReplay, onExportJson, onExportPn
            </div>
          )}
         
-        <button onClick={onNewRecording} className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-zinc-700 bg-white border border-zinc-200 rounded-md hover:bg-zinc-50 hover:border-zinc-300 transition-all shadow-sm">
-          <LayoutDashboard className="w-3.5 h-3.5" />
-          New Recording
-        </button>
-        <button onClick={onStartReplay} className={cn("flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white border border-transparent rounded-md transition-all shadow-sm",
-           isReplaying ? "bg-amber-600 hover:bg-amber-700 shadow-amber-500/20" : "bg-indigo-600 hover:bg-indigo-700 shadow-indigo-500/20"
+        <button onClick={onStartReplay} className={cn("flex items-center gap-2 px-4 py-1.5 text-[13px] font-semibold text-white border border-transparent rounded-lg transition-all shadow-sm active:scale-[0.98]",
+           isReplaying ? "bg-amber-500 hover:bg-amber-600 shadow-amber-500/20" : "bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-700 hover:to-indigo-600 shadow-indigo-500/20"
         )}>
-          {isReplaying ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
+          {isReplaying ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5 fill-current" />}
           {isReplaying ? "Stop Replay" : "Start Replay"}
         </button>
         
-        <div className="relative ml-1" ref={menuRef}>
+        <div className="relative" ref={menuRef}>
           <button 
             onClick={() => setIsExportMenuOpen(!isExportMenuOpen)} 
             className={cn("flex items-center justify-center p-1.5 text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100 rounded-md transition-all border border-transparent", isExportMenuOpen && "bg-zinc-100 text-zinc-900 border-zinc-200 shadow-sm")} 

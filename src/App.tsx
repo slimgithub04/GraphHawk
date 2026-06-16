@@ -14,7 +14,7 @@ export default function App() {
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
   const [isReplaying, setIsReplaying] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [layoutDir, setLayoutDir] = useState<'LR' | 'TB'>('LR');
+  const [layoutName, setLayoutName] = useState('dagre');
   const [cyInstance, setCyInstance] = useState<cytoscape.Core | null>(null);
 
   const selectedRun = runs.find(r => r.id === selectedRunId) || null;
@@ -217,7 +217,7 @@ export default function App() {
               onSelectNode={(node) => setSelectedNodeId(node?.id || null)} 
               selectedNodeId={selectedNodeId}
               isReplaying={isReplaying}
-              layoutDir={layoutDir}
+              layoutName={layoutName}
               onCyInit={setCyInstance}
             />
             <Inspector node={selectedNode} />
@@ -229,7 +229,8 @@ export default function App() {
             setIsReplaying={setIsReplaying}
             onStepBack={handleStepBack}
             onStepForward={handleStepForward}
-            onToggleSettings={() => setLayoutDir(prev => prev === 'LR' ? 'TB' : 'LR')}
+            layoutName={layoutName}
+            setLayoutName={setLayoutName}
             activeNodesCount={activeNodesCount}
             totalNodesCount={graphToRender?.nodes.length || 0}
             divergenceCount={divergenceCount}

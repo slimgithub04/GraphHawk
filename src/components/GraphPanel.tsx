@@ -11,11 +11,11 @@ interface GraphPanelProps {
   onSelectNode: (node: NodeData | null) => void;
   selectedNodeId: string | null;
   isReplaying: boolean;
-  layoutDir: 'LR' | 'TB';
+  layoutName: string;
   onCyInit?: (cy: cytoscape.Core) => void;
 }
 
-export function GraphPanel({ run, onSelectNode, selectedNodeId, isReplaying, layoutDir, onCyInit }: GraphPanelProps) {
+export function GraphPanel({ run, onSelectNode, selectedNodeId, isReplaying, layoutName, onCyInit }: GraphPanelProps) {
   const cyRef = useRef<cytoscape.Core | null>(null);
   
   const graphToRender = run ? (isReplaying && run.divergedGraph ? run.divergedGraph : run.graph) : null;
@@ -63,10 +63,10 @@ export function GraphPanel({ run, onSelectNode, selectedNodeId, isReplaying, lay
         'font-family': 'Inter, sans-serif',
         'font-size': '11px',
         'font-weight': 600,
-        'color': '#27272a',
-        'background-color': '#f4f4f5',
+        'color': '#1e293b',
+        'background-color': '#f1f5f9',
         'border-width': 2,
-        'border-color': '#d4d4d8',
+        'border-color': '#cbd5e1',
         'shape': 'ellipse',
         'width': '56px',
         'height': '56px',
@@ -107,28 +107,28 @@ export function GraphPanel({ run, onSelectNode, selectedNodeId, isReplaying, lay
     {
       selector: 'node.decision',
       style: {
-        'background-color': '#f4f4f5',
-        'border-color': '#a1a1aa',
+        'background-color': '#f1f5f9',
+        'border-color': '#94a3b8',
       }
     },
     {
       selector: 'edge',
       style: {
         'width': 2,
-        'line-color': '#d4d4d8',
-        'target-arrow-color': '#d4d4d8',
+        'line-color': '#cbd5e1',
+        'target-arrow-color': '#cbd5e1',
         'target-arrow-shape': 'triangle',
         'curve-style': 'bezier',
         'label': 'data(label)',
         'font-size': '10px',
         'font-family': 'Inter, sans-serif',
         'font-weight': 600,
-        'color': '#71717a',
+        'color': '#64748b',
         'text-background-opacity': 1,
         'text-background-color': '#ffffff',
         'text-background-padding': '4px',
         'text-border-width': 1,
-        'text-border-color': '#e4e4e7',
+        'text-border-color': '#e2e8f0',
         'text-border-opacity': 1,
         'transition-property': 'line-color, target-arrow-color, width',
         'transition-duration': 300,
@@ -147,24 +147,42 @@ export function GraphPanel({ run, onSelectNode, selectedNodeId, isReplaying, lay
       selector: ':selected',
       style: {
         'border-width': 4,
-        'border-color': '#18181b',
+        'border-color': '#0f172a',
       }
     }
   ];
 
-  const layout = {
-    name: 'dagre',
-    rankDir: layoutDir,
-    spacingFactor: 1.5,
+  const baseLayoutOptions = {
     animate: true,
     animationDuration: 500,
-    animationEasing: 'ease-in-out'
+    animationEasing: 'ease-in-out',
+    spacingFactor: layoutName === 'dagre' ? 1.5 : 1.2
   };
+
+  const layout = layoutName === 'dagre' ? {
+    ...baseLayoutOptions,
+    name: 'dagre',
+    rankDir: 'LR'
+  } : layoutName === 'breadthfirst' ? {
+    ...baseLayoutOptions,
+    name: 'breadthfirst',
+    directed: true
+  } : {
+    ...baseLayoutOptions,
+    name: layoutName
+  };
+
+  useEffect(() => {
+    if (cyRef.current && elements.length > 0) {
+      cyRef.current.layout(layout).run();
+      cyRef.current.fit();
+    }
+  }, [graphToRender?.nodes.length, graphToRender?.edges.length, layoutName, isReplaying]);
 
   return (
     <div className="flex-1 relative bg-white overflow-hidden">
        {/* Background pattern */}
-       <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: 'radial-gradient(#e4e4e7 1px, transparent 1px)', backgroundSize: '24px 24px' }}></div>
+       <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: 'radial-gradient(#e2e8f0 1px, transparent 1px)', backgroundSize: '24px 24px' }}></div>
        
        <CytoscapeComponent
           elements={elements}

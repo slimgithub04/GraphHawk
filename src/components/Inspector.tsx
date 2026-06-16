@@ -10,9 +10,9 @@ interface InspectorProps {
 export function Inspector({ node }: InspectorProps) {
   if (!node) {
     return (
-      <div className="w-[420px] border-l border-zinc-200 bg-zinc-50 flex flex-col h-full shrink-0 items-center justify-center text-zinc-400 p-8 text-center space-y-4">
-         <ActivitySquare className="w-12 h-12 stroke-1 text-zinc-300" />
-         <p className="text-sm font-medium">Select a node in the graph to view execution details, prompts, and memory state.</p>
+      <div className="w-[420px] border-l border-slate-200 bg-slate-50 flex flex-col h-full shrink-0 items-center justify-center text-slate-400 p-8 text-center space-y-4 shadow-[-4px_0_15px_-5px_rgba(0,0,0,0.05)] z-20 relative">
+         <ActivitySquare className="w-12 h-12 stroke-1 text-slate-300" />
+         <p className="text-[14px] font-medium text-slate-500">Select a node in the graph to view execution details, prompts, and memory state.</p>
       </div>
     );
   }
@@ -23,7 +23,7 @@ export function Inspector({ node }: InspectorProps) {
       case 'output': return 'bg-emerald-50 text-emerald-700 border-emerald-200/60 shadow-sm';
       case 'llm': return 'bg-indigo-50 text-indigo-700 border-indigo-200/60 shadow-sm';
       case 'tool': return 'bg-violet-50 text-violet-700 border-violet-200/60 shadow-sm';
-      default: return 'bg-zinc-100 text-zinc-700 border-zinc-200 shadow-sm';
+      default: return 'bg-slate-100 text-slate-700 border-slate-200 shadow-sm';
     }
   };
 
@@ -37,19 +37,19 @@ export function Inspector({ node }: InspectorProps) {
   };
 
   return (
-    <div className="w-[420px] border-l border-zinc-200 bg-white flex flex-col h-full shrink-0 overflow-y-auto">
-      <div className="p-6 border-b border-zinc-100 bg-zinc-50/50">
+    <div className="w-[420px] border-l border-slate-200 bg-white flex flex-col h-full shrink-0 overflow-y-auto shadow-[-4px_0_15px_-5px_rgba(0,0,0,0.05)] z-20 relative">
+      <div className="p-6 border-b border-slate-100 bg-slate-50/50">
         <div className="flex items-center justify-between mb-4">
           <span className={cn("px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-widest border flex items-center gap-1.5", getTypeStyle(node.type))}>
             {getIcon(node.type)}
             {node.type}
           </span>
-          <span className="text-xs font-mono font-medium text-zinc-500 bg-zinc-100 px-2 py-1 rounded-md border border-zinc-200/50 shadow-sm">{node.id}</span>
+          <span className="text-[11px] font-mono font-medium text-slate-500 bg-slate-100 px-2.5 py-1 rounded-md border border-slate-200/50 shadow-sm">{node.id}</span>
         </div>
-        <h2 className="text-xl font-bold text-zinc-900 leading-tight mb-4 tracking-tight">{node.label}</h2>
-        <div className="flex items-center gap-4 text-xs font-semibold text-zinc-500 tracking-wide">
-          <div className="flex items-center gap-1.5 whitespace-nowrap"><Clock className="w-3.5 h-3.5 text-zinc-400" /> {node.timestamp}</div>
-          <div className="flex items-center gap-1.5 whitespace-nowrap"><ActivitySquare className="w-3.5 h-3.5 text-zinc-400" /> {node.latencyMs}ms</div>
+        <h2 className="text-[20px] font-bold text-slate-900 leading-tight mb-4 tracking-tight">{node.label}</h2>
+        <div className="flex items-center gap-4 text-xs font-semibold text-slate-500 tracking-wide">
+          <div className="flex items-center gap-1.5 whitespace-nowrap"><Clock className="w-3.5 h-3.5 text-slate-400" /> {node.timestamp}</div>
+          <div className="flex items-center gap-1.5 whitespace-nowrap"><ActivitySquare className="w-3.5 h-3.5 text-slate-400" /> {node.latencyMs}ms</div>
         </div>
       </div>
 
@@ -65,8 +65,8 @@ export function Inspector({ node }: InspectorProps) {
 
         {node.prompt && (
           <div>
-            <h4 className="text-[10px] uppercase font-bold text-zinc-500 mb-2 tracking-widest flex items-center gap-1.5"><MessageSquare className="w-3 h-3" /> LLM Prompt</h4>
-            <div className="bg-zinc-900 rounded-lg text-[13px] text-zinc-300 p-4 font-mono whitespace-pre-wrap leading-relaxed shadow-inner overflow-x-auto selection:bg-indigo-500/30">
+            <h4 className="text-[10px] uppercase font-bold text-slate-500 mb-2 tracking-widest flex items-center gap-1.5"><MessageSquare className="w-3 h-3" /> LLM Prompt</h4>
+            <div className="bg-[#0f172a] rounded-lg text-[13px] text-slate-300 p-4 font-mono whitespace-pre-wrap leading-relaxed shadow-inner overflow-x-auto selection:bg-indigo-500/30">
               {node.prompt}
             </div>
           </div>
@@ -74,8 +74,8 @@ export function Inspector({ node }: InspectorProps) {
 
         {node.response && (
           <div>
-            <h4 className="text-[10px] uppercase font-bold text-zinc-500 mb-2 tracking-widest flex items-center gap-1.5"><TerminalSquare className="w-3 h-3" /> Model Response</h4>
-            <div className="bg-zinc-900 rounded-lg text-[13px] text-zinc-300 p-4 font-mono whitespace-pre-wrap leading-relaxed shadow-inner overflow-x-auto selection:bg-indigo-500/30 border border-zinc-800">
+            <h4 className="text-[10px] uppercase font-bold text-slate-500 mb-2 tracking-widest flex items-center gap-1.5"><TerminalSquare className="w-3 h-3" /> Model Response</h4>
+            <div className="bg-[#0f172a] rounded-lg text-[13px] text-slate-300 p-4 font-mono whitespace-pre-wrap leading-relaxed shadow-inner overflow-x-auto selection:bg-indigo-500/30 border border-slate-800">
               {node.response}
             </div>
           </div>
@@ -83,8 +83,8 @@ export function Inspector({ node }: InspectorProps) {
 
         {node.toolParameters && (
           <div>
-            <h4 className="text-[10px] uppercase font-bold text-zinc-500 mb-2 tracking-widest flex items-center gap-1.5"><FileJson className="w-3 h-3" /> Tool Parameters</h4>
-            <pre className="bg-zinc-900 text-zinc-300 rounded-lg p-4 overflow-x-auto text-[13px] font-mono shadow-inner border border-zinc-800 selection:bg-indigo-500/30">
+            <h4 className="text-[10px] uppercase font-bold text-slate-500 mb-2 tracking-widest flex items-center gap-1.5"><FileJson className="w-3 h-3" /> Tool Parameters</h4>
+            <pre className="bg-[#0f172a] text-slate-300 rounded-lg p-4 overflow-x-auto text-[13px] font-mono shadow-inner border border-slate-800 selection:bg-indigo-500/30">
               {JSON.stringify(node.toolParameters, null, 2)}
             </pre>
           </div>
@@ -92,10 +92,10 @@ export function Inspector({ node }: InspectorProps) {
 
         {node.toolResponse && (
           <div>
-            <h4 className="text-[10px] uppercase font-bold text-zinc-500 mb-2 tracking-widest flex items-center gap-1.5"><FileJson className="w-3 h-3" /> Tool Response Result</h4>
+            <h4 className="text-[10px] uppercase font-bold text-slate-500 mb-2 tracking-widest flex items-center gap-1.5"><FileJson className="w-3 h-3" /> Tool Response Result</h4>
             <pre className={cn(
               "rounded-lg p-4 overflow-x-auto text-[13px] font-mono shadow-inner border",
-              node.type === 'error' ? "bg-rose-950/80 text-rose-200 border-rose-900/50" : "bg-zinc-900 text-zinc-300 border-zinc-800 selection:bg-indigo-500/30"
+              node.type === 'error' ? "bg-rose-950/80 text-rose-200 border-rose-900/50" : "bg-[#0f172a] text-slate-300 border-slate-800 selection:bg-indigo-500/30"
             )}>
               {JSON.stringify(node.toolResponse, null, 2)}
             </pre>
@@ -104,8 +104,8 @@ export function Inspector({ node }: InspectorProps) {
 
         {node.stateSnapshot && (
           <div>
-            <h4 className="text-[10px] uppercase font-bold text-zinc-500 mb-2 tracking-widest flex items-center gap-1.5"><Database className="w-3 h-3" /> Memory Snapshot</h4>
-            <pre className="bg-zinc-50 rounded-lg p-4 overflow-x-auto text-[12px] font-mono border border-zinc-200/80 text-zinc-600 shadow-sm">
+            <h4 className="text-[10px] uppercase font-bold text-slate-500 mb-2 tracking-widest flex items-center gap-1.5"><Database className="w-3 h-3" /> Memory Snapshot</h4>
+            <pre className="bg-slate-50 rounded-lg p-4 overflow-x-auto text-[12px] font-mono border border-slate-200/80 text-slate-600 shadow-sm">
               {JSON.stringify(node.stateSnapshot, null, 2)}
             </pre>
           </div>
