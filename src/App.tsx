@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import cytoscape from 'cytoscape';
 import { Topbar } from './components/Topbar';
 import { Sidebar } from './components/Sidebar';
@@ -7,22 +7,53 @@ import { Inspector } from './components/Inspector';
 import { BottomBar } from './components/BottomBar';
 import { mockRuns } from './mockData';
 import { NodeData } from './types';
+import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
 
 export default function App() {
   const [runs, setRuns] = useState(mockRuns);
+  const [runsHistory, setRunsHistory] = useState<typeof mockRuns[]>([]);
   const [selectedRunId, setSelectedRunId] = useState<string | null>(mockRuns[0].id);
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
   const [isReplaying, setIsReplaying] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [layoutName, setLayoutName] = useState('dagre');
   const [cyInstance, setCyInstance] = useState<cytoscape.Core | null>(null);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isInspectorOpen, setIsInspectorOpen] = useState(true);
+
+  useEffect(() => {
+    fetch('/api/neo4j/graph')
+      .then(res => res.json())
+      .then(data => {
+        if (data.nodes && data.nodes.length > 0) {
+          const neo4jRun = {
+            id: 'RUN-NEO4J',
+            title: 'Neo4j Graph Database',
+            date: new Date().toISOString(),
+            status: 'success' as const,
+            stepsCount: data.nodes.length,
+            totalLatencyMs: data.nodes.reduce((acc: number, n: any) => acc + (n.data.latencyMs || 0), 0),
+            fidelityScore: 100,
+            graph: data
+          };
+          setRuns(currentRuns => {
+            if (currentRuns.find(r => r.id === 'RUN-NEO4J')) {
+              return currentRuns.map(r => r.id === 'RUN-NEO4J' ? neo4jRun : r);
+            }
+            return [neo4jRun, ...currentRuns];
+          });
+          setSelectedRunId('RUN-NEO4J');
+        }
+      })
+      .catch(err => console.error("Neo4j fetch error", err));
+  }, []);
 
   const selectedRun = runs.find(r => r.id === selectedRunId) || null;
   const graphToRender = selectedRun ? (isReplaying && selectedRun.divergedGraph ? selectedRun.divergedGraph : selectedRun.graph) : null;
   
   const selectedNode = useMemo(() => {
     if (!graphToRender || !selectedNodeId) return null;
-    return graphToRender.nodes.find(n => n.data.id === selectedNodeId)?.data || null;
+    return graphToRender.nodes.find(n => String(n.data.id) === String(selectedNodeId))?.data || null;
   }, [graphToRender, selectedNodeId]);
 
   const filteredRuns = useMemo(() => {
@@ -90,7 +121,7 @@ export default function App() {
     if (!graphToRender) return;
     
     let mermaid = 'graph TD\n';
-    if(layoutDir === 'LR') mermaid = 'graph LR\n';
+    if(layoutName === 'dagre') mermaid = 'graph LR\n';
     
     graphToRender.nodes.forEach(n => {
         const id = n.data.id;
@@ -185,7 +216,143 @@ export default function App() {
     ? graphToRender.nodes.findIndex(n => n.data.id === selectedNodeId) + 1 
     : 0;
 
+  const handleUpdateAnnotation = (nodeId: string, annotations: string) => {
+    if (!selectedRunId) return;
+
+    if (selectedRunId === 'RUN-NEO4J') {
+      fetch(`/api/neo4j/node/${nodeId}/annotation`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ annotations })
+      }).catch(err => console.error('Failed to update Neo4j annotation:', err));
+    }
+
+    setRuns(currentRuns => {
+      setRunsHistory(prev => [...prev, currentRuns]);
+      return currentRuns.map(run => {
+        if (run.id !== selectedRunId) return run;
+
+        const updateGraph = (graph: typeof run.graph) => ({
+          ...graph,
+          nodes: graph.nodes.map(n => 
+            n.data.id === nodeId 
+              ? { ...n, data: { ...n.data, annotations } } 
+              : n
+          )
+        });
+
+        return {
+          ...run,
+          graph: updateGraph(run.graph),
+          divergedGraph: run.divergedGraph ? updateGraph(run.divergedGraph) : undefined
+        };
+      });
+    });
+  };
+
+  const handleSeedNeo4j = () => {
+    fetch('/api/neo4j/seed', { method: 'POST' })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          alert('Neo4j database seeded successfully! Reloading...');
+          window.location.reload();
+        } else {
+          alert('Failed to seed Neo4j: ' + data.error);
+        }
+      })
+      .catch(err => alert('Error seeding Neo4j: ' + err));
+  };
+
   const divergenceCount = selectedRun?.divergedGraph?.edges.filter(e => e.data.isDiverged).length || 0;
+
+  useKeyboardShortcuts([
+    {
+      key: 'z',
+      ctrlKey: true,
+      handler: () => {
+        if (runsHistory.length > 0) {
+          setRuns(runsHistory[runsHistory.length - 1]);
+          setRunsHistory(prev => prev.slice(0, -1));
+        }
+      }
+    },
+    {
+      key: ' ',
+      handler: (e) => {
+        e.preventDefault();
+        setIsReplaying(prev => !prev);
+      }
+    },
+    {
+      key: 'ArrowLeft',
+      handler: (e) => { e.preventDefault(); handleStepBack(); }
+    },
+    {
+      key: 'ArrowUp',
+      handler: (e) => { e.preventDefault(); handleStepBack(); }
+    },
+    {
+      key: 'ArrowRight',
+      handler: (e) => { e.preventDefault(); handleStepForward(); }
+    },
+    {
+      key: 'ArrowDown',
+      handler: (e) => { e.preventDefault(); handleStepForward(); }
+    },
+    {
+      key: '[',
+      ctrlKey: true,
+      handler: () => setIsSidebarOpen(prev => !prev)
+    },
+    {
+      key: ']',
+      ctrlKey: true,
+      handler: () => setIsInspectorOpen(prev => !prev)
+    },
+    {
+      key: '=',
+      handler: () => {
+        if (cyInstance) cyInstance.zoom(cyInstance.zoom() * 1.2);
+      }
+    },
+    {
+      key: '-',
+      handler: () => {
+        if (cyInstance) cyInstance.zoom(cyInstance.zoom() * 0.8);
+      }
+    },
+    {
+      key: '0',
+      handler: () => {
+        if (cyInstance) cyInstance.fit(undefined, 30);
+      }
+    },
+    {
+      key: '1',
+      handler: () => setLayoutName('dagre')
+    },
+    {
+      key: '2',
+      handler: () => setLayoutName('breadthfirst')
+    },
+    {
+      key: '3',
+      handler: () => setLayoutName('grid')
+    },
+    {
+      key: 'f',
+      handler: () => {
+        if (!document.fullscreenElement) {
+          document.documentElement.requestFullscreen().catch(err => {
+            console.error(`Error attempting to enable fullscreen: ${err.message}`);
+          });
+        } else {
+          document.exitFullscreen();
+        }
+      }
+    }
+  ]);
 
   return (
     <div className="flex flex-col h-screen w-screen bg-white text-gray-900 font-sans overflow-hidden">
@@ -198,29 +365,56 @@ export default function App() {
         onExportMarkdown={handleExportMarkdown}
         isReplaying={isReplaying}
         fidelityScore={selectedRun?.fidelityScore || 0}
+        isSidebarOpen={isSidebarOpen}
+        setIsSidebarOpen={setIsSidebarOpen}
+        isInspectorOpen={isInspectorOpen}
+        setIsInspectorOpen={setIsInspectorOpen}
       />
       
       <div className="flex flex-1 overflow-hidden">
-        <Sidebar 
-          runs={filteredRuns} 
-          selectedRunId={selectedRunId} 
-          onSelectRun={handleSelectRun}
-          searchQuery={searchQuery}
-          setSearchQuery={setSearchQuery}
-          onNewRecording={handleNewRecording}
-        />
+        {isSidebarOpen && (
+          <Sidebar 
+            runs={filteredRuns} 
+            selectedRunId={selectedRunId} 
+            onSelectRun={handleSelectRun}
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
+            onNewRecording={handleNewRecording}
+            onSeedNeo4j={handleSeedNeo4j}
+          />
+        )}
         
         <div className="flex flex-col flex-1 relative min-w-0">
           <div className="flex flex-1 overflow-hidden relative">
             <GraphPanel 
               run={selectedRun} 
-              onSelectNode={(node) => setSelectedNodeId(node?.id || null)} 
+              onSelectNode={(node) => {
+                setSelectedNodeId(node?.id || null);
+                if (node) setIsInspectorOpen(true);
+              }} 
               selectedNodeId={selectedNodeId}
               isReplaying={isReplaying}
               layoutName={layoutName}
               onCyInit={setCyInstance}
             />
-            <Inspector node={selectedNode} />
+            {isInspectorOpen && (
+              <Inspector 
+                node={selectedNode} 
+                previousNode={
+                  selectedNode && graphToRender 
+                    ? (() => {
+                        const incomingEdge = graphToRender.edges.find(e => String(e.data.target) === String(selectedNode.id));
+                        if (incomingEdge) {
+                          const prevNodeId = incomingEdge.data.source;
+                          return graphToRender.nodes.find(n => String(n.data.id) === String(prevNodeId))?.data || null;
+                        }
+                        return null;
+                      })()
+                    : null
+                }
+                onUpdateAnnotation={handleUpdateAnnotation}
+              />
+            )}
           </div>
           
           <BottomBar 

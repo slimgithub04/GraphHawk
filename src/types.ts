@@ -14,7 +14,7 @@ export interface NodeData {
   toolResponse?: any;
   stateSnapshot?: object;
   aiAnalysis?: string;
-  annotation?: string;
+  annotations?: string;
 }
 
 export interface EdgeData {

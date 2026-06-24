@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { LayoutGrid, Play, Download, Pause, FileJson, Image, Code2, FileText } from 'lucide-react';
+import { LayoutGrid, Play, Download, Pause, FileJson, Image, Code2, FileText, PanelLeft, PanelRight } from 'lucide-react';
 import { cn } from '../lib/utils';
 
 interface TopbarProps {
@@ -11,9 +11,13 @@ interface TopbarProps {
   onExportMarkdown: () => void;
   isReplaying: boolean;
   fidelityScore: number;
+  isSidebarOpen: boolean;
+  setIsSidebarOpen: (isOpen: boolean) => void;
+  isInspectorOpen: boolean;
+  setIsInspectorOpen: (isOpen: boolean) => void;
 }
 
-export function Topbar({ onStartReplay, onExportJson, onExportPng, onExportMermaid, onExportMarkdown, isReplaying, fidelityScore }: TopbarProps) {
+export function Topbar({ onStartReplay, onExportJson, onExportPng, onExportMermaid, onExportMarkdown, isReplaying, fidelityScore, isSidebarOpen, setIsSidebarOpen, isInspectorOpen, setIsInspectorOpen }: TopbarProps) {
   const [isExportMenuOpen, setIsExportMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -30,7 +34,14 @@ export function Topbar({ onStartReplay, onExportJson, onExportPng, onExportMerma
   return (
     <header className="h-14 border-b border-zinc-200 bg-white flex items-center justify-between px-5 shrink-0">
       <div className="flex items-center gap-3">
-        <div className="bg-[#0f172a] p-1.5 rounded-md shadow-sm">
+        <button 
+          onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+          className={cn("p-1.5 text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100 rounded-md transition-all border border-transparent", isSidebarOpen && "bg-zinc-100 text-zinc-900 border-zinc-200 shadow-sm")}
+          title="Toggle Sidebar"
+        >
+          <PanelLeft className="w-5 h-5" />
+        </button>
+        <div className="bg-[#0f172a] p-1.5 rounded-md shadow-sm ml-1">
           <LayoutGrid className="w-5 h-5 text-white" strokeWidth={2.5} />
         </div>
         <div className="flex items-center gap-2 text-sm ml-1">
@@ -83,6 +94,16 @@ export function Topbar({ onStartReplay, onExportJson, onExportPng, onExportMerma
             </div>
           )}
         </div>
+        
+        <div className="h-6 w-px bg-zinc-200 mx-1"></div>
+        
+        <button 
+          onClick={() => setIsInspectorOpen(!isInspectorOpen)}
+          className={cn("p-1.5 text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100 rounded-md transition-all border border-transparent", isInspectorOpen && "bg-zinc-100 text-zinc-900 border-zinc-200 shadow-sm")}
+          title="Toggle Inspector"
+        >
+          <PanelRight className="w-5 h-5" />
+        </button>
       </div>
     </header>
   );

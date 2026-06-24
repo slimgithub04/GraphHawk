@@ -1,7 +1,7 @@
 import React from 'react';
 import { RunData } from '../types';
 import { cn } from '../lib/utils';
-import { Search, Plus } from 'lucide-react';
+import { Search, Plus, Database } from 'lucide-react';
 
 interface SidebarProps {
   runs: RunData[];
@@ -10,9 +10,10 @@ interface SidebarProps {
   searchQuery: string;
   setSearchQuery: (q: string) => void;
   onNewRecording: () => void;
+  onSeedNeo4j?: () => void;
 }
 
-export function Sidebar({ runs, selectedRunId, onSelectRun, searchQuery, setSearchQuery, onNewRecording }: SidebarProps) {
+export function Sidebar({ runs, selectedRunId, onSelectRun, searchQuery, setSearchQuery, onNewRecording, onSeedNeo4j }: SidebarProps) {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'success': 
@@ -28,14 +29,21 @@ export function Sidebar({ runs, selectedRunId, onSelectRun, searchQuery, setSear
 
   return (
     <div className="w-80 border-r border-slate-200 bg-white flex flex-col h-full shrink-0">
-      <div className="p-4 border-b border-slate-100 bg-white">
-        <button onClick={onNewRecording} className="w-full flex items-center justify-center gap-2 bg-[#0f172a] hover:bg-slate-800 text-white py-2.5 rounded-lg text-[15px] font-semibold transition-all shadow-md shadow-slate-900/10 mb-5 active:scale-[0.98]">
+      <div className="p-4 border-b border-slate-100 bg-white space-y-3">
+        <button onClick={onNewRecording} className="w-full flex items-center justify-center gap-2 bg-[#0f172a] hover:bg-slate-800 text-white py-2.5 rounded-lg text-[15px] font-semibold transition-all shadow-md shadow-slate-900/10 active:scale-[0.98]">
           <Plus className="w-4 h-4 stroke-[3px]" />
           Record New Run
         </button>
+        
+        {onSeedNeo4j && (
+          <button onClick={onSeedNeo4j} className="w-full flex items-center justify-center gap-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 py-2 rounded-lg text-[13px] font-semibold transition-all active:scale-[0.98]">
+            <Database className="w-3.5 h-3.5" />
+            Seed Neo4j Database
+          </button>
+        )}
 
-        <div className="relative">
-          <Search className="w-4 h-4 absolute left-3 top-2.5 text-slate-400" />
+        <div className="relative pt-2">
+          <Search className="w-4 h-4 absolute left-3 top-4.5 text-slate-400" />
           <input 
             type="text" 
             value={searchQuery}

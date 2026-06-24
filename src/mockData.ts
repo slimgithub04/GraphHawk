@@ -41,7 +41,7 @@ export const mockRuns: RunData[] = [
         { data: { id: 'n2', label: 'Intent Classification', type: 'llm', timestamp: '11:05:00.020', latencyMs: 1540, prompt: 'Classify intent of customer message: "I was charged twice for my subscription this month. I need a refund immediately."', response: 'Intent: Refund Request, Urgency: High, Category: Billing', aiAnalysis: 'LLM correctly determined intent.' } },
         { data: { id: 'n3', label: 'Fetch Payment History', type: 'tool', timestamp: '11:05:01.560', latencyMs: 1200, toolParameters: { customerId: 'cus_992', limit: 5 }, toolResponse: { charges: [{ id: 'ch_1', amount: 50.00, status: 'succeeded' }, { id: 'ch_2', amount: 50.00, status: 'succeeded' }] } } },
         { data: { id: 'n4', label: 'Verify Double Charge', type: 'llm', timestamp: '11:05:02.760', latencyMs: 2100, prompt: 'Analyze charges logic. Are there duplicate charges within 24h?', response: 'Yes, ch_1 and ch_2 occurred within 2 mins of each other.' } },
-        { data: { id: 'n5', label: 'Issue Stripe Refund', type: 'error', timestamp: '11:05:04.860', latencyMs: 3340, toolParameters: { chargeId: 'ch_2', amount: 50.00, reason: 'duplicate' }, toolResponse: { error: 'Insufficient funds in API reserve account.', code: 'balance_insufficient' }, aiAnalysis: 'Tool call failed. The Stripe API rejected the refund due to account balance.', annotation: 'Need to add an interceptor for this error to notify finance instead of crashing the workflow.' } }
+       { data: { id: 'n5', label: 'Issue Stripe Refund', type: 'error', timestamp: '11:05:04.860', latencyMs: 3340, toolParameters: { chargeId: 'ch_2', amount: 50.00, reason: 'duplicate' }, toolResponse: { error: 'Insufficient funds in API reserve account.', code: 'balance_insufficient' }, aiAnalysis: 'Tool call failed. The Stripe API rejected the refund due to account balance.', annotations: 'Need to add an interceptor for this error to notify finance instead of crashing the workflow.' } }
       ],
       edges: [
         { data: { id: 'e1', source: 'n1', target: 'n2' } },
@@ -152,7 +152,7 @@ export const mockRuns: RunData[] = [
       nodes: [
         { data: { id: 'n1', label: 'Batch Processing Trigger', type: 'decision', timestamp: '14:10:00.000', latencyMs: 15 } },
         { data: { id: 'n2', label: 'Fetch User Telemetry', type: 'tool', timestamp: '14:10:00.015', latencyMs: 4500, toolParameters: { bucket: 'telemetry_archive', date: 'yesterday' }, toolResponse: { data: '500MB parquet file', rows: 120000 } } },
-        { data: { id: 'n3', label: 'Run Python Script', type: 'tool', timestamp: '14:10:04.515', latencyMs: 5000, toolParameters: { script: 'predict_churn.py', input: '500MB parquet file' }, toolResponse: { returncode: 1, stderr: 'ModuleNotFoundError: No module named pandas' }, annotation: 'Dependency mismatch in the worker container.' } },
+        { data: { id: 'n3', label: 'Run Python Script', type: 'tool', timestamp: '14:10:04.515', latencyMs: 5000, toolParameters: { script: 'predict_churn.py', input: '500MB parquet file' }, toolResponse: { returncode: 1, stderr: 'ModuleNotFoundError: No module named pandas' }, annotations: 'Dependency mismatch in the worker container.' } },
         { data: { id: 'n4', label: 'Notify Pipeline Failure', type: 'error', timestamp: '14:10:09.515', latencyMs: 85, toolParameters: { channel: '#data-eng-alerts', message: 'Churn prediction job failed: ModuleNotFoundError' } } }
       ],
       edges: [
